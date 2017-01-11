@@ -9,6 +9,7 @@ import os #file functionalities
 import re #regex for string parsing
 import timeit #execution time calculations
 import requests #http library
+from lxml import html #html scraper
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -26,14 +27,20 @@ class imageLoader:
 		"""Download url
 		"""
 		try:
-			req = requests.get(url)
-			status = req.status_code
+			response = requests.get(url)
+			status = response.status_code
 		except requests.ConnectionError:
 			pass # continue to return "ERROR", -1
 		else:
 			#print("Downloading URL '" + url + "' returned with status code " + str(status))
-			return req, status
+			return response, status
 		return "ERROR", -1 # return this if we got ConnectionError
+
+	@staticmethod
+	def readPageStructure(response):
+		"""Read html structure from plain HTTP response"""
+		pagetree = html.fromstring(response.content)
+		return pagetree
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
@@ -48,6 +55,9 @@ if __name__ == "__main__":
 
 	start_time = timeit.default_timer()
 
-	imageLoader.getUrlResponse(runParameters.args.url)
+	response, status = imageLoader.getUrlResponse(runParameters.args.url)
+	pagetree = imageLoader.readPageStructure(response)
+	images = pagetree.xpath('//img')
+	print("images=" + str(images))
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
