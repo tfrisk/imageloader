@@ -14,6 +14,7 @@ try:
 	from BeautifulSoup import BeautifulSoup
 except ImportError:
 	from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -46,8 +47,23 @@ class imageLoader:
 		html = BeautifulSoup(response.content, "lxml")
 		return html
 
+	def isUrlValid(self,url):
+		req = requests.head(url)
+		if (req.status_code == 200):
+			return True
+		return False
+
 	def formProperImageUrl(self,imagepath):
-		return os.path.join(self.args.url,imagepath)
+		"""Use some fuzzy logic to figure out the proper image url"""
+		if (imagepath.startswith("http")):
+			return imagepath
+		else:
+			urlparts = urlparse(self.args.url)
+			#print("urlparts=" + str(urlparts))
+			proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
+			if self.isUrlValid(proposed_url):
+				return proposed_url
+			return "DID_NOT_WORK"
 
 	def findImagesFromHtml(self,parsed_html):
 		resultset = {}
