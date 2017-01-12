@@ -10,6 +10,10 @@ import re #regex for string parsing
 import timeit #execution time calculations
 import requests #http library
 from lxml import html #html scraper
+try:
+	from BeautifulSoup import BeautifulSoup
+except ImportError:
+	from bs4 import BeautifulSoup
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -39,8 +43,39 @@ class imageLoader:
 	@staticmethod
 	def readPageStructure(response):
 		"""Read html structure from plain HTTP response"""
-		pagetree = html.fromstring(response.content)
-		return pagetree
+		html = BeautifulSoup(response.content, "lxml")
+		return html
+
+	@staticmethod
+	def findImagesFromHtml(parsed_html):
+		resultset = {}
+		url=''
+		images = parsed_html.find_all("img")
+		for image in images:
+			source = imageLoader.findKeyOrEmpty(image,"src")
+			if not source:
+				continue # move to next image, this has no src defined
+			alttext = imageLoader.findKeyOrEmpty(image,"alt")
+			title = imageLoader.findKeyOrEmpty(image,"title")
+			filename = os.path.basename(source)
+			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url}
+			#print("src=" + source + ", alt=" + alttext + ", title=" + title + "\n")
+		return resultset
+
+	@staticmethod
+	def findKeyOrEmpty(resultset, key):
+		"""
+		Find if collection has key, otherwise return empty string
+		>>> imageLoader.findKeyOrEmpty({"a":1, "b":2}, "a")
+		1
+		>>> imageLoader.findKeyOrEmpty({"a":1, "b":2}, "c")
+		''
+		"""
+		try:
+			value = resultset[key]
+		except KeyError:
+			value = ''
+		return value
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
@@ -56,8 +91,13 @@ if __name__ == "__main__":
 	start_time = timeit.default_timer()
 
 	response, status = imageLoader.getUrlResponse(runParameters.args.url)
-	pagetree = imageLoader.readPageStructure(response)
-	images = pagetree.xpath('//img')
-	print("images=" + str(images))
+	if (status != 200):
+		sys.exit(-1)
+
+	parsed_html = imageLoader.readPageStructure(response)
+	imagelist = imageLoader.findImagesFromHtml(parsed_html)
+
+	print("resultset=" + str(imagelist))
+
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)

@@ -14,12 +14,5 @@ class imageloader_test(unittest.TestCase):
         self.assertEqual(status, -1)
         self.assertEqual(response, "ERROR")
 
-    def test_readPageStructure_ok(self):
-        """Test that we can parse proper html"""
-        response, status = imageLoader.getUrlResponse("http://www.google.com/")
-        test_pagetree = imageLoader.readPageStructure(response)
-        header = test_pagetree.xpath('//head')
-        self.assertTrue(header)
-
 if __name__ == '__main__':
     unittest.main()
