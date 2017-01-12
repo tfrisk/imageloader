@@ -46,8 +46,10 @@ class imageLoader:
 		html = BeautifulSoup(response.content, "lxml")
 		return html
 
-	@staticmethod
-	def findImagesFromHtml(parsed_html):
+	def formProperImageUrl(self,imagepath):
+		return os.path.join(self.args.url,imagepath)
+
+	def findImagesFromHtml(self,parsed_html):
 		resultset = {}
 		url=''
 		images = parsed_html.find_all("img")
@@ -58,6 +60,7 @@ class imageLoader:
 			alttext = imageLoader.findKeyOrEmpty(image,"alt")
 			title = imageLoader.findKeyOrEmpty(image,"title")
 			filename = os.path.basename(source)
+			url = self.formProperImageUrl(source)
 			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url}
 			#print("src=" + source + ", alt=" + alttext + ", title=" + title + "\n")
 		return resultset
@@ -82,20 +85,20 @@ if __name__ == "__main__":
 		print("Python version is too old, 2.7 or later is required!")
 		sys.exit(2)
 
-	runParameters = imageLoader(sys.argv[1:])
+	loader = imageLoader(sys.argv[1:])
 
-	if (runParameters.DEBUG_MODE):
+	if (loader.DEBUG_MODE):
 		print("Debug mode! Hooray!")
-		print("url: " + runParameters.args.url)
+		print("url: " + loader.args.url)
 
 	start_time = timeit.default_timer()
 
-	response, status = imageLoader.getUrlResponse(runParameters.args.url)
+	response, status = loader.getUrlResponse(loader.args.url)
 	if (status != 200):
 		sys.exit(-1)
 
-	parsed_html = imageLoader.readPageStructure(response)
-	imagelist = imageLoader.findImagesFromHtml(parsed_html)
+	parsed_html = loader.readPageStructure(response)
+	imagelist = loader.findImagesFromHtml(parsed_html)
 
 	print("resultset=" + str(imagelist))
 
