@@ -59,7 +59,8 @@ class imageLoader:
 
 	def isUrlValid(self,url):
 		"""Check if URL exists by pinging it"""
-		sleep(randint(50,1000)/1000) # sleep random 50..1000 ms
+		# sleep a bit before request to prevent flooding
+		sleep(randint(50,500)/1000) # random 50..500 ms
 		req = requests.get(url)
 		if (req.status_code == 200):
 			return True
@@ -71,6 +72,7 @@ class imageLoader:
 		if (imagepath.startswith("http")):
 			if self.isUrlValid(imagepath):
 				return imagepath
+		# try to append http to url and see if it helps
 		if (imagepath.startswith("//")):
 			proposed_url = str("http:" + imagepath)
 			if self.isUrlValid(proposed_url):
@@ -85,7 +87,7 @@ class imageLoader:
 		proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
 		if self.isUrlValid(proposed_url):
 			return proposed_url
-
+		# nope, it didn't work
 		print("imagepath: " + imagepath)
 		print("proposed_url: " + proposed_url)
 		return "DID_NOT_WORK"
