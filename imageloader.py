@@ -23,6 +23,10 @@ try:
 	from urllib.parse import quote
 except ImportError:
 	from urllib import quote
+try:
+	from urllib.request import urlretrieve
+except ImportError:
+	from urllib import urlretrieve
 from time import sleep
 from random import randint
 
@@ -109,7 +113,7 @@ class imageLoader:
 				print("---- Validation failed")
 				continue
 			print("++++ Validation ok")
-			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url}
+			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url, 'filename': filename}
 		return resultset
 
 	@staticmethod
@@ -126,6 +130,14 @@ class imageLoader:
 		except KeyError:
 			value = ''
 		return value
+
+	@staticmethod
+	def downloadFiles(imagelist):
+		"""Iterate imagelist and download files"""
+		print("imagelist=" + str(imagelist.values()))
+		for image in imagelist.values():
+			print("image=" + str(image['url']))
+			urlretrieve(image['url'], image['filename'])
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
@@ -155,5 +167,8 @@ if __name__ == "__main__":
 	print("Forming list of images OK, found " + str(len(imagelist)) + " images.")
 	#print("resultset=" + str(imagelist))
 
+	print("Image list formed and validated, downloading files..")
+	loader.downloadFiles(imagelist)
+	print("File download OK.")
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
