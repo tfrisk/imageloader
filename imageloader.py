@@ -10,11 +10,21 @@ import re #regex for string parsing
 import timeit #execution time calculations
 import requests #http library
 from lxml import html #html scraper
+# try blocks to handle both python 2 and 3
 try:
 	from BeautifulSoup import BeautifulSoup
 except ImportError:
 	from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+try:
+	from urllib.parse import urlparse
+except ImportError:
+	from urlparse import urlparse
+try:
+	from urllib.parse import quote
+except ImportError:
+	from urllib import quote
+from time import sleep
+from random import randint
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -48,22 +58,37 @@ class imageLoader:
 		return html
 
 	def isUrlValid(self,url):
-		req = requests.head(url)
+		"""Check if URL exists by pinging it"""
+		sleep(randint(50,1000)/1000) # sleep random 50..1000 ms
+		req = requests.get(url)
 		if (req.status_code == 200):
 			return True
 		return False
 
 	def formProperImageUrl(self,imagepath):
 		"""Use some fuzzy logic to figure out the proper image url"""
+		# if the image source has proper url
 		if (imagepath.startswith("http")):
-			return imagepath
-		else:
-			urlparts = urlparse(self.args.url)
-			#print("urlparts=" + str(urlparts))
-			proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
+			if self.isUrlValid(imagepath):
+				return imagepath
+		if (imagepath.startswith("//")):
+			proposed_url = str("http:" + imagepath)
 			if self.isUrlValid(proposed_url):
 				return proposed_url
-			return "DID_NOT_WORK"
+		# guess: combine the base hostname + imagepath
+		# for example: "http://solita.fi" and
+		# "/wp-content/uploads/Karri.png"
+		# will result "http://solita.fi//wp-content/uploads/Karri.png"
+
+		urlparts = urlparse(self.args.url)
+		#print("urlparts=" + str(urlparts))
+		proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
+		if self.isUrlValid(proposed_url):
+			return proposed_url
+
+		print("imagepath: " + imagepath)
+		print("proposed_url: " + proposed_url)
+		return "DID_NOT_WORK"
 
 	def findImagesFromHtml(self,parsed_html):
 		resultset = {}
@@ -76,9 +101,13 @@ class imageLoader:
 			alttext = imageLoader.findKeyOrEmpty(image,"alt")
 			title = imageLoader.findKeyOrEmpty(image,"title")
 			filename = os.path.basename(source)
+			print("Image found: [" + filename + "]")
 			url = self.formProperImageUrl(source)
+			if (url == "DID_NOT_WORK"):
+				print("---- Validation failed")
+				continue
+			print("++++ Validation ok")
 			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url}
-			#print("src=" + source + ", alt=" + alttext + ", title=" + title + "\n")
 		return resultset
 
 	@staticmethod
@@ -108,15 +137,21 @@ if __name__ == "__main__":
 		print("url: " + loader.args.url)
 
 	start_time = timeit.default_timer()
+	print("Image loader started at " + str(start_time))
 
+	print("Given URL is " + str(loader.args.url))
+	print("Begin reading URL..")
 	response, status = loader.getUrlResponse(loader.args.url)
 	if (status != 200):
+		print("ERROR while reading URL! Stopping.")
 		sys.exit(-1)
 
+	print("Read OK, parsing response..")
 	parsed_html = loader.readPageStructure(response)
+	print("Response parsing OK, forming list of images..")
 	imagelist = loader.findImagesFromHtml(parsed_html)
-
-	print("resultset=" + str(imagelist))
+	print("Forming list of images OK, found " + str(len(imagelist)) + " images.")
+	#print("resultset=" + str(imagelist))
 
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
