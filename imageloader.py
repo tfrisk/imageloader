@@ -35,10 +35,11 @@ class imageLoader:
 		""" Init config from raw command line arguments """
 		parser = argparse.ArgumentParser()
 		parser.add_argument("-u","--url", help="URL to read", required=True)
+		parser.add_argument("-D","--dir", help="Write images to specific directory", required=False, default=False)
 		parser.add_argument("-d","--debug", help="Display debug messages", required=False, action='store_true', default=False)
-		parser.add_argument("-O","--output", help="Write images to specific directory", required=False, action='store_true', default=False)
-		parser.set_defaults(output="saved-images")
+		parser.set_defaults(dir="saved-images")
 		self.args = parser.parse_args(cmd_args)
+		#self.savedir = self.args.output.strip()
 		self.DEBUG_MODE = self.args.debug
 
 	@staticmethod
@@ -132,12 +133,12 @@ class imageLoader:
 		return value
 
 	@staticmethod
-	def downloadFiles(imagelist):
+	def downloadFiles(imagelist, savepath):
 		"""Iterate imagelist and download files"""
 		print("imagelist=" + str(imagelist.values()))
 		for image in imagelist.values():
 			print("image=" + str(image['url']))
-			urlretrieve(image['url'], image['filename'])
+			urlretrieve(image['url'], os.path.join(savepath, image['filename']))
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
@@ -146,9 +147,22 @@ if __name__ == "__main__":
 
 	loader = imageLoader(sys.argv[1:])
 
+	# handle both absolute and relative paths
+	execdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+	savepath = loader.args.dir
+	if not os.path.isabs(loader.args.dir):
+		savepath = os.path.join(execdir, loader.args.dir)
+	if not os.path.isdir(savepath):
+		try:
+			os.makedirs(savepath)
+		except PermissionError:
+			print("Could not create directory [" + savepath + "]. Stopping.")
+			sys.exit(-1)
+
 	if (loader.DEBUG_MODE):
 		print("Debug mode! Hooray!")
 		print("url: " + loader.args.url)
+		print("Exec dir: " + os.path.join(os.path.abspath(os.path.dirname(sys.argv[0]))))
 
 	start_time = timeit.default_timer()
 	print("Image loader started at " + str(start_time))
@@ -168,7 +182,7 @@ if __name__ == "__main__":
 	#print("resultset=" + str(imagelist))
 
 	print("Image list formed and validated, downloading files..")
-	loader.downloadFiles(imagelist)
+	loader.downloadFiles(imagelist, savepath)
 	print("File download OK.")
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
