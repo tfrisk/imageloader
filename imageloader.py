@@ -100,8 +100,9 @@ class imageLoader:
 		if self.isUrlValid(proposed_url):
 			return proposed_url
 		# nope, it didn't work
-		print("imagepath: " + imagepath)
-		print("proposed_url: " + proposed_url)
+		if (self.args.DEBUG_MODE):
+			print("imagepath: " + imagepath)
+			print("proposed_url: " + proposed_url)
 		return "DID_NOT_WORK"
 
 	def findImagesFromHtml(self,parsed_html):
@@ -194,11 +195,13 @@ if __name__ == "__main__":
 	parsed_html = loader.readPageStructure(response)
 	print("Response parsing OK, forming list of images..")
 	imagelist = loader.findImagesFromHtml(parsed_html)
-	print("Forming list of images OK, found " + str(len(imagelist)) + " images.")
-	#print("resultset=" + str(imagelist))
+	print("Forming list of images done, found " + str(len(imagelist)) + " images.")
 
-	print("Image list formed and validated, downloading files..")
-	loader.downloadFiles(imagelist, savepath)
-	print("File download finished.")
+	if (len(imagelist) > 0):
+		print("Image list formed and validated, downloading files..")
+		loader.downloadFiles(imagelist, savepath)
+		print("File download finished.")
+	else:
+		print("No images to download.")
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
