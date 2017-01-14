@@ -63,7 +63,8 @@ class imageLoader:
         souped_html = BeautifulSoup(resp.content, "lxml")
         return souped_html
 
-    def isUrlValid(self, testurl):
+    @staticmethod
+    def isUrlValid(testurl):
         """Check if URL exists by pinging it"""
         # sleep a bit before request to prevent flooding
         sleep(randint(50, 500) / 1000) # random 50..500 ms
