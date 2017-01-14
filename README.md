@@ -33,7 +33,7 @@ Images are saved with their original names which could be messy.
 Image directory structure is not preserved, all images are saved in one
 directory flat.
 
-Generated download log ("filelist.txt") is not sorted.
+Generated download log ('filelist.txt') is not sorted.
 
 ## License
 
