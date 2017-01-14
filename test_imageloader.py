@@ -14,5 +14,11 @@ class imageloader_test(unittest.TestCase):
         self.assertEqual(status, -1)
         self.assertEqual(response, "ERROR")
 
+    def test_findKeyOrEmpty(self):
+        val = imageLoader.findKeyOrEmpty({"a":1, "b":2}, "a")
+        self.assertEqual(val,1)
+        val = imageLoader.findKeyOrEmpty({"a":1, "b":2}, "c")
+        self.assertEqual(val,'')
+
 if __name__ == '__main__':
     unittest.main()

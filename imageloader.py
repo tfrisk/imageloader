@@ -79,25 +79,36 @@ class imageLoader:
 			return True
 		return False
 
+	def formProposedUrl(self, imagepath, proposal):
+		"""Create proposed url based on proposal case
+		Case = append | combine
+		"""
+		if (proposal == "append"):
+			# try to append http to url and see if it helps
+			proposed_url = str("http:" + imagepath)
+		elif (proposal == "combine"):
+			# guess: combine the base hostname + imagepath
+			# for example: "http://solita.fi" and
+			# "/wp-content/uploads/Karri.png"
+			# will result "http://solita.fi//wp-content/uploads/Karri.png"
+			urlparts = urlparse(self.args.url)
+			#print("urlparts=" + str(urlparts))
+			proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
+		return proposed_url
+
 	def formProperImageUrl(self,imagepath):
 		"""Use some fuzzy logic to figure out the proper image url"""
 		# if the image source has proper url
 		if (imagepath.startswith("http")):
 			if self.isUrlValid(imagepath):
 				return imagepath
-		# try to append http to url and see if it helps
+
 		if (imagepath.startswith("//")):
-			proposed_url = str("http:" + imagepath)
+			proposed_url = self.formProposedUrl(imagepath, "append")
 			if self.isUrlValid(proposed_url):
 				return proposed_url
-		# guess: combine the base hostname + imagepath
-		# for example: "http://solita.fi" and
-		# "/wp-content/uploads/Karri.png"
-		# will result "http://solita.fi//wp-content/uploads/Karri.png"
 
-		urlparts = urlparse(self.args.url)
-		#print("urlparts=" + str(urlparts))
-		proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
+		proposed_url = self.formProposedUrl(imagepath, "combine")
 		if self.isUrlValid(proposed_url):
 			return proposed_url
 		# nope, it didn't work
@@ -133,10 +144,6 @@ class imageLoader:
 	def findKeyOrEmpty(resultset, key):
 		"""
 		Find if collection has key, otherwise return empty string
-		>>> imageLoader.findKeyOrEmpty({"a":1, "b":2}, "a")
-		1
-		>>> imageLoader.findKeyOrEmpty({"a":1, "b":2}, "c")
-		''
 		"""
 		try:
 			value = resultset[key]
