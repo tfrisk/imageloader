@@ -157,7 +157,7 @@ class imageLoader:
 				print(e)
 				continue
 			print("++++ " + str(image['filename']))
-			logfile.write(str(image['filename'] + "\n"))
+			logfile.write(str(image['url'] + "\n"))
 		logfile.write("----------\n")
 		logfile.close()
 
