@@ -7,7 +7,6 @@ import argparse #command line argument parser
 import sys #exits and version checkings
 import os #file functionalities
 import re #regex for string parsing
-import timeit #execution time calculations
 import requests #http library
 from lxml import html #html scraper
 # try blocks to handle both python 2 and 3
@@ -194,9 +193,8 @@ if __name__ == "__main__":
 		print("Debug mode! Hooray!")
 		print("url: " + loader.args.url)
 		print("Exec dir: " + os.path.join(os.path.abspath(os.path.dirname(sys.argv[0]))))
-
-	start_time = timeit.default_timer()
-	print("Image loader started at " + str(start_time))
+		timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+		print("Image loader started at " + str(timestamp))
 
 	# set default socket timeout so we won't end up stuck forever
 	socket.setdefaulttimeout(10)
@@ -220,5 +218,4 @@ if __name__ == "__main__":
 		print("File download finished.")
 	else:
 		print("No images to download.")
-	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
