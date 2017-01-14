@@ -27,8 +27,15 @@ try:
 	from urllib.request import urlretrieve
 except ImportError:
 	from urllib import urlretrieve
+try:
+	from urllib.error import URLError
+	from urllib.error import ContentTooShortError
+except ImportError:
+	from urllib2 import URLError
+	from urllib import ContentTooShortError
 from time import sleep
 from random import randint
+import socket
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -135,10 +142,16 @@ class imageLoader:
 	@staticmethod
 	def downloadFiles(imagelist, savepath):
 		"""Iterate imagelist and download files"""
-		print("imagelist=" + str(imagelist.values()))
 		for image in imagelist.values():
-			print("image=" + str(image['url']))
-			urlretrieve(image['url'], os.path.join(savepath, image['filename']))
+			try:
+				urlretrieve(image['url'], os.path.join(savepath, image['filename']))
+			except (URLError, ContentTooShortError, socket.timeout, IOError) as e:
+				# download failed, skip this image
+				print("---- " + str(image['url']) + " download failed")
+				print(e)
+				continue
+			print("++++ " + str(image['filename']))
+			# TODO: add entry to filelist.txt
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
@@ -167,6 +180,9 @@ if __name__ == "__main__":
 	start_time = timeit.default_timer()
 	print("Image loader started at " + str(start_time))
 
+	# set default socket timeout so we won't end up stuck forever
+	socket.setdefaulttimeout(10)
+
 	print("Given URL is " + str(loader.args.url))
 	print("Begin reading URL..")
 	response, status = loader.getUrlResponse(loader.args.url)
@@ -183,6 +199,6 @@ if __name__ == "__main__":
 
 	print("Image list formed and validated, downloading files..")
 	loader.downloadFiles(imagelist, savepath)
-	print("File download OK.")
+	print("File download finished.")
 	elapsed = timeit.default_timer() - start_time
 	sys.exit(0)
