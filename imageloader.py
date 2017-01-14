@@ -1,16 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-# Image Loader
-# Finds and downloads images from given url
-#
-# (C) 2017 Teemu Frisk
-# Distributed under the MIT License
+"""Image Loader
+Finds and downloads images from given url
+
+(C) 2017 Teemu Frisk
+Distributed under the MIT License
+"""
 
 import argparse #command line argument parser
 import sys #exits and version checkings
 import os #file functionalities
-import re #regex for string parsing
 import requests #http library
 from lxml import html #html scraper
 # try blocks to handle both python 2 and 3
@@ -42,18 +39,21 @@ import socket
 from datetime import datetime
 
 class imageLoader:
+	"""Image loader class"""
 	def __init__(self, cmd_args):
 		""" Init config from raw command line arguments """
 		parser = argparse.ArgumentParser()
-		parser.add_argument("-u","--url", help="URL to read", required=True)
-		parser.add_argument("-D","--dir", help="Write images to specific directory", required=False, default=False)
-		parser.add_argument("-d","--debug", help="Display debug messages", required=False, action='store_true', default=False)
+		parser.add_argument("-u", "--url", help="URL to read", required=True)
+		parser.add_argument("-D", "--dir", \
+			help="Write images to specific directory", required=False, default=False)
+		parser.add_argument("-d", "--debug", \
+			help="Display debug messages", required=False, action='store_true', default=False)
 		parser.set_defaults(dir="saved-images")
 		self.args = parser.parse_args(cmd_args)
 		#self.savedir = self.args.output.strip()
 		self.DEBUG_MODE = self.args.debug
 
-	def getUrlResponse(self,url):
+	def getUrlResponse(self, url):
 		"""Download url"""
 		try:
 			response = requests.get(url)
@@ -72,12 +72,12 @@ class imageLoader:
 		html = BeautifulSoup(response.content, "lxml")
 		return html
 
-	def isUrlValid(self,url):
+	def isUrlValid(self, url):
 		"""Check if URL exists by pinging it"""
 		# sleep a bit before request to prevent flooding
-		sleep(randint(50,500)/1000) # random 50..500 ms
+		sleep(randint(50, 500) / 1000) # random 50..500 ms
 		req = requests.get(url)
-		if (req.status_code == 200):
+		if req.status_code == 200:
 			return True
 		return False
 
@@ -85,10 +85,10 @@ class imageLoader:
 		"""Create proposed url based on proposal case
 		Case = append | combine
 		"""
-		if (proposal == "append"):
+		if proposal == "append":
 			# try to append http to url and see if it helps
 			proposed_url = str("http:" + imagepath)
-		elif (proposal == "combine"):
+		elif proposal == "combine":
 			# guess: combine the base hostname + imagepath
 			# for example: "http://solita.fi" and
 			# "/wp-content/uploads/Karri.png"
@@ -99,14 +99,14 @@ class imageLoader:
 			proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
 		return proposed_url
 
-	def formProperImageUrl(self,imagepath):
+	def formProperImageUrl(self, imagepath):
 		"""Use some fuzzy logic to figure out the proper image url"""
 		# if the image source has proper url
-		if (imagepath.startswith("http")):
+		if imagepath.startswith("http"):
 			if self.isUrlValid(imagepath):
 				return imagepath
 
-		if (imagepath.startswith("//")):
+		if imagepath.startswith("//"):
 			proposed_url = self.formProposedUrl(imagepath, "append")
 			if self.isUrlValid(proposed_url):
 				return proposed_url
@@ -115,32 +115,33 @@ class imageLoader:
 		if self.isUrlValid(proposed_url):
 			return proposed_url
 		# nope, it didn't work
-		if (self.DEBUG_MODE):
+		if self.DEBUG_MODE:
 			print("imagepath: " + imagepath)
 			print("proposed_url: " + proposed_url)
 		return "DID_NOT_WORK"
 
-	def findImagesFromHtml(self,parsed_html):
+	def findImagesFromHtml(self, parsed_html):
 		"""
 		Parse all <img> tags from html, ignore entries without src attributes
 		"""
 		resultset = {}
-		url=''
+		url = ''
 		images = parsed_html.find_all("img")
 		for image in images:
-			source = imageLoader.findKeyOrEmpty(image,"src")
+			source = imageLoader.findKeyOrEmpty(image, "src")
 			if not source:
 				continue # move to next image, this has no src defined
-			alttext = imageLoader.findKeyOrEmpty(image,"alt")
-			title = imageLoader.findKeyOrEmpty(image,"title")
+			alttext = imageLoader.findKeyOrEmpty(image, "alt")
+			title = imageLoader.findKeyOrEmpty(image, "title")
 			filename = os.path.basename(source)
 			print("Image found: [" + filename + "]")
 			url = self.formProperImageUrl(source)
-			if (url == "DID_NOT_WORK"):
+			if url == "DID_NOT_WORK":
 				print("---- Validation failed")
 				continue
 			print("++++ Validation ok")
-			resultset[filename] = {'src':source, 'alt': alttext, 'title': title, 'url': url, 'filename': filename}
+			resultset[filename] = \
+				{'src':source, 'alt': alttext, 'title': title, 'url': url, 'filename': filename}
 		return resultset
 
 	@staticmethod
@@ -175,7 +176,7 @@ class imageLoader:
 		logfile.close()
 
 if __name__ == "__main__":
-	if sys.version_info <= (2,7):
+	if sys.version_info <= (2, 7):
 		print("Python version is too old, 2.7 or later is required!")
 		sys.exit(2)
 
@@ -193,7 +194,7 @@ if __name__ == "__main__":
 			print("Could not create directory [" + savepath + "]. Stopping.")
 			sys.exit(-1)
 
-	if (loader.DEBUG_MODE):
+	if loader.DEBUG_MODE:
 		print("Debug mode! Hooray!")
 		print("url: " + loader.args.url)
 		print("Exec dir: " + os.path.join(os.path.abspath(os.path.dirname(sys.argv[0]))))
@@ -206,7 +207,7 @@ if __name__ == "__main__":
 	print("Given URL is " + str(loader.args.url))
 	print("Begin reading URL..")
 	response, status = loader.getUrlResponse(loader.args.url)
-	if (status != 200):
+	if status != 200:
 		print("ERROR while reading URL! Stopping.")
 		sys.exit(-1)
 
@@ -216,7 +217,7 @@ if __name__ == "__main__":
 	imagelist = loader.findImagesFromHtml(parsed_html)
 	print("Forming list of images done, found " + str(len(imagelist)) + " images.")
 
-	if (len(imagelist) > 0):
+	if len(imagelist) > 0:
 		print("Image list formed and validated, downloading files..")
 		loader.downloadFiles(imagelist, savepath)
 		print("File download finished.")
