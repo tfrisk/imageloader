@@ -49,17 +49,16 @@ class imageLoader:
 		#self.savedir = self.args.output.strip()
 		self.DEBUG_MODE = self.args.debug
 
-	@staticmethod
-	def getUrlResponse(url):
-		"""Download url
-		"""
+	def getUrlResponse(self,url):
+		"""Download url"""
 		try:
 			response = requests.get(url)
 			status = response.status_code
 		except requests.ConnectionError:
 			pass # continue to return "ERROR", -1
 		else:
-			#print("Downloading URL '" + url + "' returned with status code " + str(status))
+			if self.DEBUG_MODE:
+				print("Downloading URL '" + url + "' returned with status code " + str(status))
 			return response, status
 		return "ERROR", -1 # return this if we got ConnectionError
 
@@ -91,7 +90,8 @@ class imageLoader:
 			# "/wp-content/uploads/Karri.png"
 			# will result "http://solita.fi//wp-content/uploads/Karri.png"
 			urlparts = urlparse(self.args.url)
-			#print("urlparts=" + str(urlparts))
+			if self.DEBUG_MODE:
+				print("urlparts=" + str(urlparts))
 			proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
 		return proposed_url
 
