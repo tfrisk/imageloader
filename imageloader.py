@@ -36,6 +36,7 @@ except ImportError:
 from time import sleep
 from random import randint
 import socket
+from datetime import datetime
 
 class imageLoader:
 	def __init__(self, cmd_args):
@@ -140,9 +141,13 @@ class imageLoader:
 			value = ''
 		return value
 
-	@staticmethod
-	def downloadFiles(imagelist, savepath):
+	def downloadFiles(self, imagelist, savepath):
 		"""Iterate imagelist and download files"""
+		logfile = open(os.path.join(savepath, "filelist.txt"), "w")
+		logfile.truncate()
+		timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+		logfile.write(str("Downloaded images from " + self.args.url + " at " + timestamp + "\n"))
+		logfile.write("----------\n")
 		for image in imagelist.values():
 			try:
 				urlretrieve(image['url'], os.path.join(savepath, image['filename']))
@@ -152,7 +157,9 @@ class imageLoader:
 				print(e)
 				continue
 			print("++++ " + str(image['filename']))
-			# TODO: add entry to filelist.txt
+			logfile.write(str(image['filename'] + "\n"))
+		logfile.write("----------\n")
+		logfile.close()
 
 if __name__ == "__main__":
 	if sys.version_info <= (2,7):
