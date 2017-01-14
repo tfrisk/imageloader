@@ -26,13 +26,13 @@ class ImageloaderTest(unittest.TestCase):
     def test_downloadrawurl_ok(self):
         """Get OK response from proper url"""
         loader = imageLoader(['-u', 'http://www.google.com'])
-        _, status = loader.getUrlResponse("http://www.google.com/")
+        _, status = loader.get_url_response("http://www.google.com/")
         self.assertEqual(status, 200)
 
     def test_geturlresponse_notfound(self):
         """Get error response from incorrect url"""
         loader = imageLoader(['-u', 'http://www.google.com'])
-        _, status = loader.getUrlResponse("http://www.google.com/this-does-not-exist.xml")
+        _, status = loader.get_url_response("http://www.google.com/this-does-not-exist.xml")
         self.assertEqual(status, 404)
 
     def test_findkeyorempty(self):

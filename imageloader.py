@@ -8,35 +8,26 @@ Distributed under the MIT License
 import argparse #command line argument parser
 import sys #exits and version checkings
 import os #file functionalities
-import requests #http library
-from lxml import html #html scraper
 # try blocks to handle both python 2 and 3
 try:
 	from BeautifulSoup import BeautifulSoup
 except ImportError:
 	from bs4 import BeautifulSoup
 try:
+	from urllib.error import ContentTooShortError
+	from urllib.error import URLError
 	from urllib.parse import urlparse
-except ImportError:
-	from urlparse import urlparse
-try:
-	from urllib.parse import quote
-except ImportError:
-	from urllib import quote
-try:
 	from urllib.request import urlretrieve
 except ImportError:
-	from urllib import urlretrieve
-try:
-	from urllib.error import URLError
-	from urllib.error import ContentTooShortError
-except ImportError:
-	from urllib2 import URLError
 	from urllib import ContentTooShortError
+	from urllib import urlretrieve
+	from urllib2 import URLError
+	from urlparse import urlparse
 from time import sleep
 from random import randint
 import socket
 from datetime import datetime
+import requests #http library
 
 class imageLoader:
 	"""Image loader class"""
@@ -53,30 +44,30 @@ class imageLoader:
 		#self.savedir = self.args.output.strip()
 		self.DEBUG_MODE = self.args.debug
 
-	def getUrlResponse(self, url):
+	def get_url_response(self, url):
 		"""Download url"""
 		try:
-			response = requests.get(url)
-			status = response.status_code
+			resp = requests.get(url)
+			stat = resp.status_code
 		except requests.ConnectionError:
 			pass # continue to return "ERROR", -1
 		else:
 			if self.DEBUG_MODE:
-				print("Downloading URL '" + url + "' returned with status code " + str(status))
-			return response, status
+				print("Downloading URL '" + url + "' returned with status code " + str(stat))
+			return resp, stat
 		return "ERROR", -1 # return this if we got ConnectionError
 
 	@staticmethod
-	def readPageStructure(response):
+	def readPageStructure(resp):
 		"""Read html structure from plain HTTP response"""
-		html = BeautifulSoup(response.content, "lxml")
-		return html
+		souped_html = BeautifulSoup(resp.content, "lxml")
+		return souped_html
 
-	def isUrlValid(self, url):
+	def isUrlValid(self, testurl):
 		"""Check if URL exists by pinging it"""
 		# sleep a bit before request to prevent flooding
 		sleep(randint(50, 500) / 1000) # random 50..500 ms
-		req = requests.get(url)
+		req = requests.get(testurl)
 		if req.status_code == 200:
 			return True
 		return False
@@ -120,13 +111,13 @@ class imageLoader:
 			print("proposed_url: " + proposed_url)
 		return "DID_NOT_WORK"
 
-	def findImagesFromHtml(self, parsed_html):
+	def findImagesFromHtml(self, scraped_html):
 		"""
 		Parse all <img> tags from html, ignore entries without src attributes
 		"""
 		resultset = {}
 		url = ''
-		images = parsed_html.find_all("img")
+		images = scraped_html.find_all("img")
 		for image in images:
 			source = imageLoader.findKeyOrEmpty(image, "src")
 			if not source:
@@ -155,16 +146,16 @@ class imageLoader:
 			value = ''
 		return value
 
-	def downloadFiles(self, imagelist, savepath):
+	def downloadFiles(self, downloadlist, downloaddir):
 		"""Iterate imagelist and download files"""
-		logfile = open(os.path.join(savepath, "filelist.txt"), "w")
+		logfile = open(os.path.join(downloaddir, "filelist.txt"), "w")
 		logfile.truncate()
-		timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-		logfile.write(str("Downloaded images from " + self.args.url + " at " + timestamp + "\n"))
+		logtime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+		logfile.write(str("Downloaded images from " + self.args.url + " at " + logtime + "\n"))
 		logfile.write("----------\n")
-		for image in imagelist.values():
+		for image in downloadlist.values():
 			try:
-				urlretrieve(image['url'], os.path.join(savepath, image['filename']))
+				urlretrieve(image['url'], os.path.join(downloaddir, image['filename']))
 			except (URLError, ContentTooShortError, socket.timeout, IOError) as e:
 				# download failed, skip this image
 				print("---- " + str(image['url']) + " download failed")
@@ -206,7 +197,7 @@ if __name__ == "__main__":
 
 	print("Given URL is " + str(loader.args.url))
 	print("Begin reading URL..")
-	response, status = loader.getUrlResponse(loader.args.url)
+	response, status = loader.get_url_response(loader.args.url)
 	if status != 200:
 		print("ERROR while reading URL! Stopping.")
 		sys.exit(-1)
@@ -217,7 +208,8 @@ if __name__ == "__main__":
 	imagelist = loader.findImagesFromHtml(parsed_html)
 	print("Forming list of images done, found " + str(len(imagelist)) + " images.")
 
-	if len(imagelist) > 0:
+	images_found = len(imagelist)
+	if images_found > 0:
 		print("Image list formed and validated, downloading files..")
 		loader.downloadFiles(imagelist, savepath)
 		print("File download finished.")
