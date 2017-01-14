@@ -101,12 +101,15 @@ class imageLoader:
 		if self.isUrlValid(proposed_url):
 			return proposed_url
 		# nope, it didn't work
-		if (self.args.DEBUG_MODE):
+		if (self.DEBUG_MODE):
 			print("imagepath: " + imagepath)
 			print("proposed_url: " + proposed_url)
 		return "DID_NOT_WORK"
 
 	def findImagesFromHtml(self,parsed_html):
+		"""
+		Parse all <img> tags from html, ignore entries without src attributes
+		"""
 		resultset = {}
 		url=''
 		images = parsed_html.find_all("img")
