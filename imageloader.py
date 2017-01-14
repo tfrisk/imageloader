@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# F-Secure homework
+# Image Loader
+# Finds and downloads images from given url
+#
+# (C) 2017 Teemu Frisk
+# Distributed under the MIT License
 
 import argparse #command line argument parser
 import sys #exits and version checkings
