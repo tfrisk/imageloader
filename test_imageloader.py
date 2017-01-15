@@ -13,14 +13,14 @@ class ImageLoaderTest(unittest.TestCase):
         """Config arguments case1"""
         loader = ImageLoader(['-u', 'http://www.google.com', '-d'])
         self.assertEqual(loader.args.url, 'http://www.google.com')
-        self.assertEqual(loader.DEBUG_MODE, True)
+        self.assertEqual(loader.debug_mode, True)
         self.assertEqual(loader.args.dir, 'saved-images')
 
     def test_config_case2(self):
         """Config arguments case2"""
         loader = ImageLoader(['-u', 'http://www.google.com', '-D', 'dldir'])
         self.assertEqual(loader.args.url, 'http://www.google.com')
-        self.assertEqual(loader.DEBUG_MODE, False)
+        self.assertEqual(loader.debug_mode, False)
         self.assertEqual(loader.args.dir, 'dldir')
 
     def test_downloadrawurl_ok(self):

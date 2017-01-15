@@ -42,7 +42,7 @@ class ImageLoader:
         parser.set_defaults(dir="saved-images")
         self.args = parser.parse_args(cmd_args)
         #self.savedir = self.args.output.strip()
-        self.DEBUG_MODE = self.args.debug
+        self.debug_mode = self.args.debug
 
     def get_url_response(self, url):
         """Download url"""
@@ -52,7 +52,7 @@ class ImageLoader:
         except requests.ConnectionError:
             pass # continue to return "ERROR", -1
         else:
-            if self.DEBUG_MODE:
+            if self.debug_mode:
                 print("Downloading URL '" + url + "' returned with status code " + str(stat))
             return resp, stat
         return "ERROR", -1 # return this if we got ConnectionError
@@ -86,7 +86,7 @@ class ImageLoader:
             # "/wp-content/uploads/Karri.png"
             # will result "http://solita.fi//wp-content/uploads/Karri.png"
             urlparts = urlparse(self.args.url)
-            if self.DEBUG_MODE:
+            if self.debug_mode:
                 print("urlparts=" + str(urlparts))
             proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
         return proposed_url
@@ -107,7 +107,7 @@ class ImageLoader:
         if self.is_url_valid(proposed_url):
             return proposed_url
         # nope, it didn't work
-        if self.DEBUG_MODE:
+        if self.debug_mode:
             print("imagepath: " + imagepath)
             print("proposed_url: " + proposed_url)
         return "DID_NOT_WORK"
@@ -157,10 +157,10 @@ class ImageLoader:
         for image in downloadlist.values():
             try:
                 urlretrieve(image['url'], os.path.join(downloaddir, image['filename']))
-            except (URLError, ContentTooShortError, socket.timeout, IOError) as e:
+            except (URLError, ContentTooShortError, socket.timeout, IOError) as error:
                 # download failed, skip this image
                 print("---- " + str(image['url']) + " download failed")
-                print(e)
+                print(error)
                 continue
             print("++++ " + str(image['filename']))
             logfile.write(str(image['url'] + "\n"))
@@ -186,7 +186,7 @@ if __name__ == "__main__":
             print("Could not create directory [" + savepath + "]. Stopping.")
             sys.exit(-1)
 
-    if loader.DEBUG_MODE:
+    if loader.debug_mode:
         print("Debug mode! Hooray!")
         print("url: " + loader.args.url)
         print("Exec dir: " + os.path.join(os.path.abspath(os.path.dirname(sys.argv[0]))))
