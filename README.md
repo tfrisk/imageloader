@@ -54,6 +54,10 @@ directory flat.
 
 Generated download log ('filelist.txt') is not sorted.
 
+Network throttling in url verification is very rudimentary (random sleep
+between 50-500 ms) and does not work properly with python 2. Image
+download does not have throttling at all.
+
 ## License
 
 Copyright (c) 2017 Teemu Frisk
