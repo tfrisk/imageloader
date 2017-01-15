@@ -18,6 +18,25 @@ Python version 2.7 or later is required (works with python 3).
 
 Option `-D DIR` is optional, the default location is `./saved-images`.
 
+## Running
+
+Just execute the script with `-u URL` parameter, for example
+
+```
+$ python ./imageloader.py -u http://www.google.com
+```
+
+This will read the specified URL (`http://www.google.com` in this case)
+and save every image it can scrape from the html and download to
+directory `saved-images`. Download directory contains a list of downloaded
+files (`filelist.txt`).
+
+Running the test suite is done by running the test file
+
+```
+$ python ./test_imageloader.py
+```
+
 ## Limitations
 
 Images with <picture> element containers are not supported as they
