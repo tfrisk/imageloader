@@ -29,7 +29,7 @@ import socket
 from datetime import datetime
 import requests #http library
 
-class imageLoader:
+class ImageLoader:
     """Image loader class"""
     def __init__(self, cmd_args):
         """ Init config from raw command line arguments """
@@ -120,11 +120,11 @@ class imageLoader:
         url = ''
         images = scraped_html.find_all("img")
         for image in images:
-            source = imageLoader.find_key_or_empty(image, "src")
+            source = self.find_key_or_empty(image, "src")
             if not source:
                 continue # move to next image, this has no src defined
-            alttext = imageLoader.find_key_or_empty(image, "alt")
-            title = imageLoader.find_key_or_empty(image, "title")
+            alttext = self.find_key_or_empty(image, "alt")
+            title = self.find_key_or_empty(image, "title")
             filename = os.path.basename(source)
             print("Image found: [" + filename + "]")
             url = self.form_proper_image_url(source)
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         print("Python version is too old, 2.7 or later is required!")
         sys.exit(2)
 
-    loader = imageLoader(sys.argv[1:])
+    loader = ImageLoader(sys.argv[1:])
 
     # handle both absolute and relative paths
     execdir = os.path.abspath(os.path.dirname(sys.argv[0]))
