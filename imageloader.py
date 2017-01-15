@@ -167,11 +167,8 @@ class ImageLoader:
         logfile.write("----------\n")
         logfile.close()
 
-if __name__ == "__main__":
-    if sys.version_info <= (2, 7):
-        print("Python version is too old, 2.7 or later is required!")
-        sys.exit(2)
-
+def main():
+    """Program execution logic is here"""
     loader = ImageLoader(sys.argv[1:])
 
     # handle both absolute and relative paths
@@ -217,3 +214,9 @@ if __name__ == "__main__":
     else:
         print("No images to download.")
     sys.exit(0)
+
+if __name__ == "__main__":
+    if sys.version_info <= (2, 7):
+        print("Python version is too old, 2.7 or later is required!")
+        sys.exit(2)
+    main()
