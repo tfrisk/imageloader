@@ -37,6 +37,9 @@ Running the test suite is done by running the test file
 $ python ./test_imageloader.py
 ```
 
+Code is tested in Arch Linux with both python 2.7.13 and python 3.6.0.
+Code is checked with pylint 2.0.0 (Python 3).
+
 ## Limitations
 
 Images with <picture> element containers are not supported as they
