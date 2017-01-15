@@ -58,13 +58,13 @@ class imageLoader:
         return "ERROR", -1 # return this if we got ConnectionError
 
     @staticmethod
-    def readPageStructure(resp):
+    def read_page_structure(resp):
         """Read html structure from plain HTTP response"""
         souped_html = BeautifulSoup(resp.content, "lxml")
         return souped_html
 
     @staticmethod
-    def isUrlValid(testurl):
+    def is_url_valid(testurl):
         """Check if URL exists by pinging it"""
         # sleep a bit before request to prevent flooding
         sleep(randint(50, 500) / 1000) # random 50..500 ms
@@ -73,7 +73,7 @@ class imageLoader:
             return True
         return False
 
-    def formProposedUrl(self, imagepath, proposal):
+    def form_proposed_url(self, imagepath, proposal):
         """Create proposed url based on proposal case
         Case = append | combine
         """
@@ -91,20 +91,20 @@ class imageLoader:
             proposed_url = str(urlparts.scheme + "://" + urlparts.netloc + "/" + imagepath)
         return proposed_url
 
-    def formProperImageUrl(self, imagepath):
+    def form_proper_image_url(self, imagepath):
         """Use some fuzzy logic to figure out the proper image url"""
         # if the image source has proper url
         if imagepath.startswith("http"):
-            if self.isUrlValid(imagepath):
+            if self.is_url_valid(imagepath):
                 return imagepath
 
         if imagepath.startswith("//"):
-            proposed_url = self.formProposedUrl(imagepath, "append")
-            if self.isUrlValid(proposed_url):
+            proposed_url = self.form_proposed_url(imagepath, "append")
+            if self.is_url_valid(proposed_url):
                 return proposed_url
 
-        proposed_url = self.formProposedUrl(imagepath, "combine")
-        if self.isUrlValid(proposed_url):
+        proposed_url = self.form_proposed_url(imagepath, "combine")
+        if self.is_url_valid(proposed_url):
             return proposed_url
         # nope, it didn't work
         if self.DEBUG_MODE:
@@ -112,7 +112,7 @@ class imageLoader:
             print("proposed_url: " + proposed_url)
         return "DID_NOT_WORK"
 
-    def findImagesFromHtml(self, scraped_html):
+    def find_images_from_html(self, scraped_html):
         """
         Parse all <img> tags from html, ignore entries without src attributes
         """
@@ -120,14 +120,14 @@ class imageLoader:
         url = ''
         images = scraped_html.find_all("img")
         for image in images:
-            source = imageLoader.findKeyOrEmpty(image, "src")
+            source = imageLoader.find_key_or_empty(image, "src")
             if not source:
                 continue # move to next image, this has no src defined
-            alttext = imageLoader.findKeyOrEmpty(image, "alt")
-            title = imageLoader.findKeyOrEmpty(image, "title")
+            alttext = imageLoader.find_key_or_empty(image, "alt")
+            title = imageLoader.find_key_or_empty(image, "title")
             filename = os.path.basename(source)
             print("Image found: [" + filename + "]")
-            url = self.formProperImageUrl(source)
+            url = self.form_proper_image_url(source)
             if url == "DID_NOT_WORK":
                 print("---- Validation failed")
                 continue
@@ -137,7 +137,7 @@ class imageLoader:
         return resultset
 
     @staticmethod
-    def findKeyOrEmpty(resultset, key):
+    def find_key_or_empty(resultset, key):
         """
         Find if collection has key, otherwise return empty string
         """
@@ -147,7 +147,7 @@ class imageLoader:
             value = ''
         return value
 
-    def downloadFiles(self, downloadlist, downloaddir):
+    def download_files(self, downloadlist, downloaddir):
         """Iterate imagelist and download files"""
         logfile = open(os.path.join(downloaddir, "filelist.txt"), "w")
         logfile.truncate()
@@ -204,15 +204,15 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     print("Read OK, parsing response..")
-    parsed_html = loader.readPageStructure(response)
+    parsed_html = loader.read_page_structure(response)
     print("Response parsing OK, forming list of images..")
-    imagelist = loader.findImagesFromHtml(parsed_html)
+    imagelist = loader.find_images_from_html(parsed_html)
     print("Forming list of images done, found " + str(len(imagelist)) + " images.")
 
     images_found = len(imagelist)
     if images_found > 0:
         print("Image list formed and validated, downloading files..")
-        loader.downloadFiles(imagelist, savepath)
+        loader.download_files(imagelist, savepath)
         print("File download finished.")
     else:
         print("No images to download.")

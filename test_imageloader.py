@@ -35,21 +35,21 @@ class ImageloaderTest(unittest.TestCase):
         _, status = loader.get_url_response("http://www.google.com/this-does-not-exist.xml")
         self.assertEqual(status, 404)
 
-    def test_findkeyorempty(self):
+    def test_find_key_or_empty(self):
         """Test dictionary key wrapper"""
-        val = imageLoader.findKeyOrEmpty({"a":1, "b":2}, "a")
+        val = imageLoader.find_key_or_empty({"a":1, "b":2}, "a")
         self.assertEqual(val, 1)
-        val = imageLoader.findKeyOrEmpty({"a":1, "b":2}, "c")
+        val = imageLoader.find_key_or_empty({"a":1, "b":2}, "c")
         self.assertEqual(val, '')
-        val = imageLoader.findKeyOrEmpty({}, "a")
+        val = imageLoader.find_key_or_empty({}, "a")
         self.assertEqual(val, '')
 
-    def test_formproposedurl(self):
+    def test_form_proposed_url(self):
         """Test url forming"""
         loader = imageLoader(['-u', 'http://www.google.com'])
-        url1 = imageLoader.formProposedUrl(loader, "//google.com/media/test.png", "append")
+        url1 = imageLoader.form_proposed_url(loader, "//google.com/media/test.png", "append")
         self.assertEqual(url1, "http://google.com/media/test.png")
-        url2 = imageLoader.formProposedUrl(loader, "/media/test.png", "combine")
+        url2 = imageLoader.form_proposed_url(loader, "/media/test.png", "combine")
         self.assertEqual(url2, "http://www.google.com//media/test.png")
 
 if __name__ == '__main__':
