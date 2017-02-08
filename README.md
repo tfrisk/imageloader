@@ -37,10 +37,10 @@ Running the test suite is done by running the test file
 $ python ./test_imageloader.py
 ```
 
-Code is tested in Arch Linux with both python 2.7.13 and python 3.6.0.
+Code is tested in Arch Linux with python 2.7, python 3.6 and pypy 5.6.
 Code is checked with pylint 2.0.0 (Python 3).
 
-Required python libraries are `beatifulsoup4`, `requests` and `lxml`.
+Required libraries are `beautifulsoup4`, `requests` and `lxml`.
 
 ## Limitations
 
