@@ -40,6 +40,8 @@ $ python ./test_imageloader.py
 Code is tested in Arch Linux with both python 2.7.13 and python 3.6.0.
 Code is checked with pylint 2.0.0 (Python 3).
 
+Required python libraries are `beatifulsoup4`, `requests` and `lxml`.
+
 ## Limitations
 
 Images with <picture> element containers are not supported as they
