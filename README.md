@@ -1,5 +1,7 @@
 # Image Loader
 
+[![Build Status](https://travis-ci.org/tfrisk/imageloader.svg?branch=master)](https://travis-ci.org/tfrisk/imageloader)
+
 Load all images from given url.
 
 ## Usage
