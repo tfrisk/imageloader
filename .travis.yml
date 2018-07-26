@@ -1,10 +1,8 @@
 language: python
 
-install:
-  - pip install codecov
-
 script:
   - pytest
+  - pip install codecov
   - coverage run test_imageloader.py
 
 after_success:
