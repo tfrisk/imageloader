@@ -167,15 +167,22 @@ class ImageLoader:
         logfile.write("----------\n")
         logfile.close()
 
+    # strip url to file folder name
+    # this is pretty crude but I did not want to add regex library deps
+    def url_to_foldername(self, url):
+        foldername = url.replace('/','_').replace(':','').replace('.','_')
+        return str(foldername).strip()
+
 def main():
     """Program execution logic is here"""
     loader = ImageLoader(sys.argv[1:])
 
     # handle both absolute and relative paths
     execdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+    # use exact savepath if given, otherwise use sensible default
     savepath = loader.args.dir
     if not os.path.isabs(loader.args.dir):
-        savepath = os.path.join(execdir, loader.args.dir)
+        savepath = os.path.join(execdir, loader.args.dir + '/' + loader.url_to_foldername(loader.args.url))
     if not os.path.isdir(savepath):
         try:
             os.makedirs(savepath)
